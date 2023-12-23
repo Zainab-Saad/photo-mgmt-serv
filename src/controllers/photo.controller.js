@@ -17,31 +17,39 @@ import { photoErrors } from '../errors/photo.error.js';
 
 export const uploadPhoto = async (req, res) => {
   try {
-    const { user, file } = req;
-    const { caption } = req.body;
+    const { captions } = req.body;
+    const { user, files } = req;
     const userId = user.data.id;
-    const timestamp = Date.now();
-    const refFileName = file.originalname.split('.')[0];
-    const type = file.originalname.split('.')[1];
-    // get the file size in bytes
-    const size = parseInt(file.size);
-    const fileName = `${refFileName}_${timestamp}.${type}`;
 
-    const imageRef = ref(storage, fileName);
+    const photosUploaded = await Promise.all(
+      files.map(async (file, index) => {
+        const caption = captions[index];
+        const timestamp = Date.now();
+        const refFileName = file.originalname.split('.')[0];
+        const type = file.originalname.split('.')[1];
+        // get the file size in bytes
+        const size = parseInt(file.size);
+        const fileName = `${refFileName}_${timestamp}.${type}`;
 
-    await uploadBytes(imageRef, file.buffer);
+        const imageRef = ref(storage, fileName);
 
-    const url = await getDownloadURL(imageRef);
+        await uploadBytes(imageRef, file.buffer);
 
-    const photo = await createPhoto(userId, url, size, caption);
+        const url = await getDownloadURL(imageRef);
 
-    return resSuccess(res, 'Photo Uploaded Successfully', {
-      id: photo.id,
-      userId,
-      url: photo.url,
-      caption: photo.caption,
-      size: photo.size
-    });
+        const photo = await createPhoto(userId, url, size, caption);
+
+        return {
+          id: photo.id,
+          userId,
+          url: photo.url,
+          caption: photo.caption,
+          size: photo.size
+        };
+      })
+    );
+
+    return resSuccess(res, 'Photo Uploaded Successfully', photosUploaded);
   } catch (err) {
     console.log(err.message);
     return resFailure(res, err.message);

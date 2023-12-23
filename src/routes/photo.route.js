@@ -21,7 +21,7 @@ photoRouter.post(
   '/upload',
   hasAuthToken,
   authenticateUser,
-  upload,
+  upload.array('files'),
   uploadPhoto
 );
 
@@ -38,7 +38,7 @@ photoRouter.put(
   '/update-photo',
   hasAuthToken,
   authenticateUser,
-  upload,
+  upload.single('file'),
   updatePhotoValidator,
   validateResult,
   updatePhoto_
