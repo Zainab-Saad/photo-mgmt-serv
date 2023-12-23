@@ -17,10 +17,13 @@ import { photoErrors } from '../errors/photo.error.js';
 
 export const uploadPhoto = async (req, res) => {
   try {
-    const { captions } = req.body;
+    let { captions } = req.body;
     const { user, files } = req;
     const userId = user.data.id;
 
+    if (!Array.isArray(captions)) {
+      captions = [captions];
+    }
     const photosUploaded = await Promise.all(
       files.map(async (file, index) => {
         const caption = captions[index];
