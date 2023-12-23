@@ -90,9 +90,13 @@ export const updatePhoto_ = async (req, res, next) => {
     const { user, file } = req;
     const userId = user.data.id;
 
+    if (!file && !caption) {
+      return resFailure(res, photoErrors.UPDATE_FIELD_NOT_PROVIDED);
+    }
+
     let photo = await getPhoto(id);
 
-    if (photo.deletedAt) {
+    if (!photo || photo.deletedAt) {
       return resFailure(res, photoErrors.PHOTO_NOT_EXISTENT);
     }
 
