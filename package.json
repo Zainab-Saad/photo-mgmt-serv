@@ -1,0 +1,40 @@
+{
+  "name": "storage-mgmt-serv",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon start src/app.js",
+    "lint:fix": "eslint . --fix",
+    "prisma:generate": "prisma generate --schema=./src/models/schema.prisma",
+    "prisma:migrate:dev": "prisma migrate dev --name initial_01 --schema=./src/models/schema.prisma",
+    "prisma:migrate:deploy": "prisma migrate dev --schema=./src/models/schema.prisma",
+    "prisma:format": "prisma format --schema=./src/models/schema.prisma"
+  },
+  "repository": "https://github.com/Zainab-Saad/storage-mgmt-serv",
+  "author": "Zainab Saad <zsaad.bese21seecs@seecs.edu.pk>",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.0.1",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
+    "eslint-plugin-promise": "^6.0.0",
+    "nodemon": "^3.0.2"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^7.7.0",
+    "@prisma/client": "^5.7.1",
+    "axios": "^1.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.4.3",
+    "express-validator": "^7.0.1",
+    "firebase": "^10.7.1",
+    "firebase-admin": "^12.0.0",
+    "multer": "^1.4.5-lts.1",
+    "prisma": "^5.7.1",
+    "xhr2": "^0.2.1"
+  }
+}
