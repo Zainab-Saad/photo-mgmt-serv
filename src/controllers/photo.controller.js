@@ -156,7 +156,7 @@ export const updatePhoto_ = async (req, res, next) => {
 export const getAllPhotos = async (req, res, next) => {
   try {
     const { user } = req;
-    const allPhotos = await getAllPhotosForUserId(user.id);
+    const allPhotos = await getAllPhotosForUserId(user.data.id);
     return resSuccess(res, 'My Photos Returned Successfully', { allPhotos });
   } catch (err) {
     console.log(err.message);
