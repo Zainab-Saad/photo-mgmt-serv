@@ -24,6 +24,11 @@ export const uploadPhoto = async (req, res) => {
     if (!Array.isArray(captions)) {
       captions = [captions];
     }
+
+    if (!files.length) {
+      return resFailure(res, photoErrors.PHOTO_NOT_PROVIDED);
+    }
+
     const photosUploaded = await Promise.all(
       files.map(async (file, index) => {
         const caption = captions[index];
@@ -61,8 +66,13 @@ export const uploadPhoto = async (req, res) => {
 
 export const deletePhoto_ = async (req, res, next) => {
   try {
-    const { id } = req.body;
+    let { id } = req.body;
+    const { user } = req;
+    const userId = user.data.id;
     let photoNotFound = false;
+    let isAuthorized = true;
+
+    id =  [... new Set(id)];
 
     const photosToBeDeleted = await Promise.all(
       id.map(async (element) => {
@@ -70,12 +80,20 @@ export const deletePhoto_ = async (req, res, next) => {
         if (!photo || photo.deletedAt) {
           photoNotFound = true;
         }
+
+        if (photo && photo.userId !== parseInt(userId)) {
+          isAuthorized = false;
+        }
         return photo;
       })
     );
 
     if (photoNotFound) {
       return resFailure(res, photoErrors.PHOTO_NOT_EXISTENT);
+    }
+
+    if (!isAuthorized) {
+      return resFailure(res, photoErrors.UNAUTHORIZED_RESOURCE_ACCESS, {}, 403);
     }
 
     id.forEach(async (element, index) => {
@@ -109,6 +127,10 @@ export const updatePhoto_ = async (req, res, next) => {
 
     if (!photo || photo.deletedAt) {
       return resFailure(res, photoErrors.PHOTO_NOT_EXISTENT);
+    }
+
+    if (photo.userId !== userId) {
+      return resFailure(res, photoErrors.UNAUTHORIZED_RESOURCE_ACCESS, {}, 403);
     }
 
     let downloadUrl = null;
