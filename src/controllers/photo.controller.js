@@ -14,6 +14,10 @@ import {
   updatePhoto
 } from '../services/photo.service.js';
 import { photoErrors } from '../errors/photo.error.js';
+import { updateStorage } from './helpers/photo.helper.js';
+
+const UPDATE_STORAGE_INCREASE = 'increase';
+const UPDATE_STORAGE_DECREASE = 'decrease';
 
 export const uploadPhoto = async (req, res) => {
   try {
@@ -47,6 +51,8 @@ export const uploadPhoto = async (req, res) => {
 
         const photo = await createPhoto(userId, url, size, caption);
 
+        await updateStorage(req, res, size, UPDATE_STORAGE_INCREASE);
+
         return {
           id: photo.id,
           userId,
@@ -72,7 +78,7 @@ export const deletePhoto_ = async (req, res, next) => {
     let photoNotFound = false;
     let isAuthorized = true;
 
-    id =  [... new Set(id)];
+    id = [...new Set(id)];
 
     const photosToBeDeleted = await Promise.all(
       id.map(async (element) => {
@@ -102,6 +108,7 @@ export const deletePhoto_ = async (req, res, next) => {
       const fileRef = ref(storage, photo.url);
       await deleteObject(fileRef);
       await deletePhoto(photo.id);
+      await updateStorage(req, res, photo.size, UPDATE_STORAGE_DECREASE);
     });
 
     return resSuccess(res, 'Photo(s) Deleted Successfully');
@@ -133,6 +140,7 @@ export const updatePhoto_ = async (req, res, next) => {
       return resFailure(res, photoErrors.UNAUTHORIZED_RESOURCE_ACCESS, {}, 403);
     }
 
+    const prevSize = photo.size;
     let downloadUrl = null;
     let size = null;
     // if the photo itself has to be updated
@@ -162,6 +170,13 @@ export const updatePhoto_ = async (req, res, next) => {
       caption: !caption ? photo.caption : caption
     });
 
+    const sizeDiff = prevSize - size;
+    console.log('->>>>', prevSize, size, sizeDiff)
+    if (prevSize < size) {
+      await updateStorage(req, res, Math.abs(sizeDiff), UPDATE_STORAGE_INCREASE);
+    } else if (prevSize > size) {
+      await updateStorage(req, res, Math.abs(sizeDiff), UPDATE_STORAGE_DECREASE);
+    }
     return resSuccess(res, 'Photo Uploaded Successfully', {
       id: photo.id,
       userId,

@@ -4,7 +4,8 @@ import {
   hasAuthToken,
   deletePhotoValidator,
   authenticateUser,
-  updatePhotoValidator
+  updatePhotoValidator,
+  checkStorageUpload
 } from '../middlewares/photo.middleware.js';
 import { validateResult } from '../utils/validationResult.util.js';
 import { upload } from '../utils/multerStorage.util.js';
@@ -22,6 +23,7 @@ photoRouter.post(
   hasAuthToken,
   authenticateUser,
   upload.array('files'),
+  checkStorageUpload,
   uploadPhoto
 );
 
